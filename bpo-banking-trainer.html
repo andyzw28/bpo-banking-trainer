@@ -933,7 +933,7 @@ async function sendAgentMessage() {
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' 'x-api-key': 'sk-ant-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'},
+      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
