@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BPO Banking Trainer — Simulador de Entrenamiento</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy2: #112040;
+    --navy3: #1a3060;
+    --gold: #c9a84c;
+    --gold2: #e8c97a;
+    --gold3: #f5e4b0;
+    --cream: #faf8f4;
+    --cream2: #f0ece3;
+    --text: #1a1a2e;
+    --text2: #4a5568;
+    --text3: #8896aa;
+    --green: #1a6b4a;
+    --green-bg: #e8f5ef;
+    --red: #9b2335;
+    --red-bg: #fdeef0;
+    --amber: #8b5e0a;
+    --amber-bg: #fef8e8;
+    --border: rgba(10,22,40,0.1);
+    --border2: rgba(10,22,40,0.06);
+    --shadow: 0 1px 3px rgba(10,22,40,0.08), 0 4px 16px rgba(10,22,40,0.06);
+    --shadow-lg: 0 4px 24px rgba(10,22,40,0.12), 0 12px 48px rgba(10,22,40,0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border: 1.5px solid var(--gold);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    color: var(--gold);
+    font-size: 16px;
+  }
+  .logo-text {
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.5px;
+  }
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .trainee-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 4px 12px 4px 6px;
+  }
+  .trainee-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--navy);
+  }
+  .trainee-name { font-size: 12px; color: rgba(255,255,255,0.8); }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr 300px;
+    gap: 0;
+    flex: 1;
+    height: calc(100vh - 60px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    background: var(--navy2);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-section {
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+  .panel-title {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text3);
+    margin-bottom: 14px;
+  }
+  .scenario-list { display: flex; flex-direction: column; gap: 6px; }
+  .scenario-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .scenario-item:hover { background: rgba(255,255,255,0.05); }
+  .scenario-item.active {
+    background: rgba(201,168,76,0.12);
+    border-color: rgba(201,168,76,0.3);
+  }
+  .scenario-tag {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+  .scenario-tag.fraud { color: #ef4444; }
+  .scenario-tag.account { color: var(--gold); }
+  .scenario-tag.loan { color: #60a5fa; }
+  .scenario-tag.complaint { color: #f97316; }
+  .scenario-tag.invest { color: #34d399; }
+  .scenario-name {
+    font-size: 13px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.35;
+  }
+  .scenario-diff {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-top: 5px;
+  }
+  .diff-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+  }
+  .diff-dot.filled { background: var(--gold); }
+  .diff-dot.empty { background: rgba(255,255,255,0.15); }
+  .diff-label { font-size: 10px; color: var(--text3); margin-left: 4px; }
+
+  .kb-section { flex: 1; overflow-y: auto; padding: 20px; }
+  .kb-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .kb-card:hover { background: rgba(255,255,255,0.07); }
+  .kb-card-title { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 500; margin-bottom: 4px; }
+  .kb-card-desc { font-size: 11px; color: var(--text3); line-height: 1.4; }
+  .kb-icon {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+    background: rgba(201,168,76,0.15);
+    text-align: center;
+    line-height: 20px;
+    font-size: 11px;
+    margin-bottom: 6px;
+  }
+
+  /* ── CHAT CENTER ── */
+  .chat-area {
+    display: flex;
+    flex-direction: column;
+    background: var(--cream);
+    overflow: hidden;
+  }
+  .chat-topbar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .scenario-header { display: flex; align-items: center; gap: 12px; }
+  .client-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--navy);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'DM Serif Display', serif;
+    color: var(--gold);
+    font-size: 16px;
+  }
+  .client-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .client-info { font-size: 12px; color: var(--text3); }
+  .session-controls { display: flex; gap: 8px; }
+  .ctrl-btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--border);
+    background: #fff;
+    color: var(--text2);
+    transition: all 0.15s;
+  }
+  .ctrl-btn:hover { background: var(--cream2); }
+  .ctrl-btn.primary {
+    background: var(--navy);
+    color: #fff;
+    border-color: transparent;
+  }
+  .ctrl-btn.primary:hover { background: var(--navy3); }
+  .ctrl-btn.danger { color: var(--red); border-color: rgba(155,35,53,0.2); }
+  .ctrl-btn.danger:hover { background: var(--red-bg); }
+
+  .messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .msg { display: flex; gap: 10px; align-items: flex-start; animation: fadeUp 0.2s ease; }
+  .msg.trainee { flex-direction: row-reverse; }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg-av {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 500;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .msg-av.client-av { background: var(--navy); color: var(--gold); font-family: 'DM Serif Display', serif; }
+  .msg-av.trainee-av { background: var(--cream2); color: var(--text2); }
+  .bubble {
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 16px;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .msg.client .bubble {
+    background: #fff;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 4px 16px 16px 16px;
+    box-shadow: var(--shadow);
+  }
+  .msg.trainee .bubble {
+    background: var(--navy);
+    color: rgba(255,255,255,0.92);
+    border-radius: 16px 4px 16px 16px;
+  }
+  .msg.system-msg .bubble {
+    background: var(--amber-bg);
+    color: var(--amber);
+    border-radius: 8px;
+    font-size: 12px;
+    border: 1px solid rgba(139,94,10,0.2);
+    margin: 0 auto;
+  }
+  .msg.system-msg { justify-content: center; }
+  .msg-meta { font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .msg.trainee .msg-meta { text-align: right; }
+
+  .typing-indicator .bubble { padding: 14px 16px; }
+  .typing-dots { display: flex; gap: 4px; }
+  .typing-dots span {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--text3);
+    animation: blink 1.3s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,60%,100%{opacity:0.3;transform:scale(1)} 30%{opacity:1;transform:scale(1.2)} }
+
+  .suggestions-row {
+    display: flex;
+    gap: 6px;
+    padding: 10px 24px;
+    overflow-x: auto;
+    background: #fff;
+    border-top: 1px solid var(--border2);
+    flex-shrink: 0;
+  }
+  .sug-chip {
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    background: var(--cream);
+    color: var(--text2);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .sug-chip:hover { background: var(--navy); color: #fff; border-color: transparent; }
+
+  .input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    padding: 14px 24px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  textarea {
+    flex: 1;
+    min-height: 42px;
+    max-height: 120px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-family: 'DM Sans', sans-serif;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--cream);
+    color: var(--text);
+    resize: none;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    line-height: 1.5;
+  }
+  textarea:focus {
+    border-color: var(--navy);
+    box-shadow: 0 0 0 3px rgba(10,22,40,0.07);
+    background: #fff;
+  }
+  .send-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--navy);
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s, transform 0.1s;
+    flex-shrink: 0;
+  }
+  .send-btn:hover { background: var(--navy3); }
+  .send-btn:active { transform: scale(0.95); }
+
+  /* ── RIGHT PANEL ── */
+  .right-panel {
+    background: #fff;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .right-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+  }
+  .rtab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+  .rtab.active { color: var(--navy); border-bottom-color: var(--gold); }
+  .rtab:hover:not(.active) { color: var(--text2); background: var(--cream2); }
+  .right-content { flex: 1; overflow-y: auto; padding: 20px; }
+
+  /* Score cards */
+  .score-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+  .score-card {
+    background: var(--cream);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
+  }
+  .score-val { font-size: 22px; font-weight: 300; color: var(--navy); font-family: 'DM Serif Display', serif; }
+  .score-lbl { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; text-transform: uppercase; margin-top: 2px; }
+  .progress-bar-wrap { margin-bottom: 14px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--text2); margin-bottom: 5px; }
+  .progress-bar { height: 6px; background: var(--cream2); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+  .fill-green { background: var(--green); }
+  .fill-gold { background: var(--gold); }
+  .fill-blue { background: #3b82f6; }
+  .fill-red { background: var(--red); }
+
+  /* Feedback */
+  .feedback-item {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+    line-height: 1.5;
+    border-left: 3px solid transparent;
+  }
+  .feedback-item.good { background: var(--green-bg); border-left-color: var(--green); color: var(--green); }
+  .feedback-item.warn { background: var(--amber-bg); border-left-color: var(--amber); color: var(--amber); }
+  .feedback-item.bad { background: var(--red-bg); border-left-color: var(--red); color: var(--red); }
+  .feedback-title { font-weight: 500; margin-bottom: 2px; }
+
+  /* KB viewer */
+  .kb-article { padding: 12px; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; }
+  .kb-article-title { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 8px; }
+  .kb-article-body { font-size: 12px; color: var(--text2); line-height: 1.6; }
+  .kb-tag { display: inline-block; font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--cream2); color: var(--text3); margin-right: 4px; margin-bottom: 6px; }
+
+  /* Checklist */
+  .checklist-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border2);
+    font-size: 13px;
+    color: var(--text2);
+  }
+  .check-box {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+    transition: all 0.15s;
+  }
+  .check-box.checked { background: var(--green); border-color: var(--green); }
+  .check-text { line-height: 1.4; }
+  .check-text.done { text-decoration: line-through; color: var(--text3); }
+
+  /* Result overlay */
+  .result-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(10,22,40,0.7);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+  }
+  .result-overlay.show { display: flex; }
+  .result-card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 40px;
+    width: 500px;
+    max-width: 90vw;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .result-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .result-score {
+    font-family: 'DM Serif Display', serif;
+    font-size: 56px;
+    color: var(--gold);
+    line-height: 1;
+    margin: 16px 0;
+  }
+  .result-grade {
+    font-size: 16px;
+    color: var(--text2);
+    margin-bottom: 24px;
+  }
+  .result-breakdown {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin: 24px 0;
+    text-align: center;
+  }
+  .rb-val { font-size: 20px; font-weight: 500; color: var(--navy); }
+  .rb-lbl { font-size: 11px; color: var(--text3); }
+  .result-actions { display: flex; gap: 10px; justify-content: center; margin-top: 24px; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">B</div>
+    <div>
+      <div class="logo-text">BancaEntrenador</div>
+      <div class="logo-sub">Simulador BPO · Banking</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="trainee-badge">
+      <div class="trainee-avatar" id="traineeInitials">AG</div>
+      <span class="trainee-name" id="traineeName">Agente en práctica</span>
+    </div>
+  </div>
+</header>
+
+<div class="app">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-section">
+      <div class="panel-title">Escenarios de práctica</div>
+      <div class="scenario-list" id="scenarioList"></div>
+    </div>
+    <div class="kb-section">
+      <div class="panel-title">Base de conocimiento</div>
+      <div id="kbList"></div>
+    </div>
+  </div>
+
+  <!-- CHAT CENTER -->
+  <div class="chat-area">
+    <div class="chat-topbar">
+      <div class="scenario-header">
+        <div class="client-avatar" id="clientAvatar">C</div>
+        <div>
+          <div class="client-name" id="clientName">Selecciona un escenario</div>
+          <div class="client-info" id="clientInfo">Elige un caso de entrenamiento para comenzar</div>
+        </div>
+      </div>
+      <div class="session-controls">
+        <button class="ctrl-btn" onclick="showKB()">📖 Base de conocimiento</button>
+        <button class="ctrl-btn danger" onclick="endSession()">Finalizar sesión</button>
+      </div>
+    </div>
+
+    <div class="messages" id="messages">
+      <div class="msg system-msg">
+        <div class="bubble">Selecciona un escenario en el panel izquierdo para comenzar tu sesión de entrenamiento.</div>
+      </div>
+    </div>
+
+    <div class="suggestions-row" id="suggestionsRow"></div>
+
+    <div class="input-row">
+      <textarea id="agentInput" placeholder="Escribe tu respuesta como agente bancario..." rows="1"
+        onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" onclick="sendAgentMessage()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
+          <line x1="22" y1="2" x2="11" y2="13"></line>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL -->
+  <div class="right-panel">
+    <div class="right-tabs">
+      <div class="rtab active" onclick="switchTab(this,'score')">Evaluación</div>
+      <div class="rtab" onclick="switchTab(this,'feedback')">Retroalimentación</div>
+      <div class="rtab" onclick="switchTab(this,'checklist')">Protocolo</div>
+    </div>
+    <div class="right-content" id="rightContent"></div>
+  </div>
+
+</div>
+
+<!-- Result Overlay -->
+<div class="result-overlay" id="resultOverlay">
+  <div class="result-card">
+    <div class="result-title">Sesión completada</div>
+    <div id="resultGradeLabel" class="result-grade"></div>
+    <div class="result-score" id="resultScore">—</div>
+    <div class="result-breakdown" id="resultBreakdown"></div>
+    <div style="font-size:13px;color:#4a5568;line-height:1.6;" id="resultSummary"></div>
+    <div class="result-actions">
+      <button class="ctrl-btn" onclick="closeResult()">Cerrar</button>
+      <button class="ctrl-btn primary" onclick="retryScenario()">Repetir escenario</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── KNOWLEDGE BASE ──
+const KB = [
+  {
+    id: 'bloqueo',
+    title: 'Bloqueo de tarjetas y medidas de seguridad',
+    tags: ['fraude','seguridad','tarjetas'],
+    body: `Para bloqueo inmediato: verificar identidad con 3 factores (nombre completo, número de cédula, pregunta de seguridad registrada). Proceder al bloqueo en sistema CRM → Módulo Tarjetas → Bloqueo de emergencia. Registrar motivo: pérdida / robo / fraude sospechoso. Generar número de caso. Informar plazo de reposición: 5-7 días hábiles. Si hay cargos no reconocidos, escalar a Fraudes con número de caso.`
+  },
+  {
+    id: 'prestamo',
+    title: 'Requisitos para préstamos personales',
+    tags: ['crédito','préstamo','requisitos'],
+    body: `Documentación requerida: cédula vigente, extractos bancarios últimos 3 meses, certificado de ingresos o declaración de renta. Montos desde $1M hasta $100M COP. Tasas de interés: 1.5% a 2.8% mensual según perfil. Plazos: 12, 24, 36, 48 y 60 meses. Score mínimo Datacrédito: 650. Tiempo de respuesta: 24-72 horas hábiles. El cliente puede consultar estado de solicitud por app o llamando al 01-8000-XXX.`
+  },
+  {
+    id: 'transf',
+    title: 'Transferencias internacionales y límites',
+    tags: ['transferencias','divisas','SWIFT'],
+    body: `Límite diario transferencias nacionales: $10M COP por canal digital, sin límite en sucursal. Transferencias internacionales: requieren formulario DCIN-83 para montos superiores a USD 10,000 (regulación DIAN). Tiempo: 2-4 días hábiles SWIFT. Comisiones: $25,000-$95,000 COP según banco destino. Para solicitar transferencia internacional llamar a la línea especializada o ir a sucursal. El cliente debe contar con perfil cambiario activo.`
+  },
+  {
+    id: 'reclamo',
+    title: 'Gestión de reclamos y PQR',
+    tags: ['PQR','reclamo','quejas'],
+    body: `Todo reclamo debe registrarse en sistema PQRS con número de radicado. Tiempo de respuesta regulatorio: 15 días hábiles (Superfinanciera). Para reclamos urgentes (fraude activo, acceso no autorizado): 48 horas. Escalar a supervisor si: cliente insiste después de 2 intentos de solución, monto >$5M, amenaza de denuncia. Siempre cerrar con número de radicado y confirmar canal de respuesta. El cliente puede consultar estado en: www.banco.co/pqrs o línea 01-8000.`
+  },
+  {
+    id: 'cuentas',
+    title: 'Apertura y tipos de cuentas',
+    tags: ['cuentas','apertura','productos'],
+    body: `Cuenta de ahorros: sin saldo mínimo, 4 retiros gratuitos/mes, GMF exonerado hasta $9.95M. Cuenta corriente: saldo mínimo $50,000, chequera incluida, sin límite de transacciones. Cuenta nómina: sin comisiones si empresa tiene convenio. Requisitos apertura: cédula, servicios públicos, formulario de vinculación, formulario FATCA. Tiempo: apertura inmediata en sucursal, 2-3 días por digital. Aplican cupos SARLAFT.`
+  },
+  {
+    id: 'invest',
+    title: 'Productos de inversión y CDT',
+    tags: ['inversión','CDT','fiducia'],
+    body: `CDT: montos desde $1M, plazos 30, 60, 90, 180 y 360 días. Tasas vigentes Q1 2026: 90 días 10.5% EA, 180 días 11.2% EA, 360 días 11.8% EA. Fondos de inversión colectiva: liquidez diaria o semanal, mínimo $500K. No son depósitos garantizados por Fogafín. Perfilación obligatoria antes de ofrecer productos de inversión. Declarar: "Las rentabilidades pasadas no garantizan rentabilidades futuras."`
+  }
+];
+
+// ── SCENARIOS ──
+const SCENARIOS = [
+  {
+    id: 'fraude1',
+    tag: 'fraud', tagLabel: 'Fraude',
+    name: 'Cliente reporta cargos no reconocidos',
+    difficulty: 3,
+    clientName: 'Carlos Mendoza', clientInitial: 'CM',
+    clientInfo: 'Titular cuenta · CC 10.245.678',
+    opening: 'Buenas tardes. Mire, estoy muy preocupado. Acabo de revisar mi extracto y hay tres cargos que yo no hice: dos compras en una tienda online por $380,000 cada una y un retiro de $500,000 en un cajero de Medellín. Yo vivo en Bogotá y jamás he viajado allá. ¿Qué hago?',
+    systemPrompt: `Eres Carlos Mendoza, cliente de un banco colombiano, hombre de 45 años, muy preocupado porque detectó cargos fraudulentos en su cuenta. 
+Tu estado emocional: ansioso y agitado al inicio, pero se calma si el agente es empático y eficiente.
+Tus datos: CC 10.245.678, cuenta de ahorros terminada en 4521, los cargos son del 20 de marzo de 2026.
+Comportamiento: si el agente NO verifica tu identidad primero, quéjate y di que te parece raro que no te pidan datos. Si el agente es eficiente, te muestras agradecido. Si tarda mucho o da respuestas vagas, aumenta tu nivel de exigencia. Haz preguntas razonables como: ¿cuándo me devuelven el dinero? ¿bloquean la tarjeta? ¿qué pasa con los cargos?
+Responde SIEMPRE en español, como un cliente real colombiano. Máximo 3 oraciones por mensaje. NO des tus datos hasta que el agente los solicite correctamente.`,
+    suggestions: ['Buenos días señor Mendoza, le confirmo su identidad primero', 'Entiendo su preocupación, procedemos con el bloqueo inmediato', 'Voy a registrar su reclamo con número de radicado', 'Le explico el proceso de reversión de cargos'],
+    checklist: ['Saludo empático y profesional','Verificó identidad (3 factores)','Confirmó datos de los cargos reportados','Procedió con bloqueo de tarjeta','Registró el caso con número de radicado','Explicó tiempo de resolución','Escaló a área de Fraudes','Cerró la llamada correctamente']
+  },
+  {
+    id: 'prestamo1',
+    tag: 'loan', tagLabel: 'Crédito',
+    name: 'Solicitud de préstamo personal urgente',
+    difficulty: 2,
+    clientName: 'María Fernández', clientInitial: 'MF',
+    clientInfo: 'Cliente Premium · CC 52.789.123',
+    opening: 'Hola, necesito un préstamo personal urgente. Necesito $15,000,000 para una emergencia médica de mi mamá. Ya tengo cuenta con ustedes hace 8 años. ¿Cuánto me pueden prestar y qué tan rápido me lo aprueban?',
+    systemPrompt: `Eres María Fernández, cliente premium del banco, 38 años, empleada de empresa de retail. Necesitas un préstamo de $15M urgente para una cirugía de tu madre.
+Tu estado: angustiada por la urgencia pero también pragmática. Quieres respuestas concretas, no rodeos.
+Tus datos: CC 52.789.123, ingresos mensuales $4.2M, llevas 8 años con el banco, sin deudas actuales.
+Comportamiento: haz preguntas directas sobre tasas, cuotas mensuales y tiempo de aprobación. Si el agente te ofrece una tasa sin explicarte bien, pregunta "¿eso es mensual o anual?". Si el agente es claro y empático, aceptas avanzar. Si sientes que te están vendiendo sin considerar tu situación, lo dices.
+Habla como colombiana, natural, máximo 3 oraciones.`,
+    suggestions: ['Con gusto le ayudo, necesito verificar su información', 'Tiene muy buen perfil, le explico las opciones disponibles', 'La tasa es del 1.8% mensual, le calculo la cuota', 'El proceso toma 24-48 horas hábiles'],
+    checklist: ['Identificó necesidad del cliente','Consultó perfil crediticio','Explicó requisitos claramente','Presentó opciones de plazo y tasa','Calculó cuota aproximada','Informó tiempo de respuesta','No prometió aprobación sin análisis','Ofreció continuar solicitud']
+  },
+  {
+    id: 'reclamo1',
+    tag: 'complaint', tagLabel: 'PQR',
+    name: 'Cliente molesto por cobro incorrecto',
+    difficulty: 3,
+    clientName: 'Roberto Sánchez', clientInitial: 'RS',
+    clientInfo: 'Cuenta corriente · CC 79.432.156',
+    opening: '¡Qué pena pero estoy muy molesto! Me cobraron $85,000 de comisión en mi cuenta corriente y yo tengo una cuenta especial que no tiene comisiones. Esto no es la primera vez que pasa. El mes pasado también me cobraron mal y tuve que llamar 3 veces. Esto es un pésimo servicio. Quiero que me devuelvan la plata YA y que alguien me explique por qué siguen cometiéndose estos errores.',
+    systemPrompt: `Eres Roberto Sánchez, 52 años, empresario, cliente de cuenta corriente empresarial. Estás muy molesto porque te cobraron mal por segunda vez consecutiva.
+Tu estado: indignado y exigente. No aceptas excusas. Has llamado antes y no se resolvió.
+Tus datos: CC 79.432.156, cuenta corriente con convenio empresarial que exonera comisiones.
+Comportamiento: si el agente se pone defensivo o dice "no puedo ver eso desde aquí", escalas la molestia. Si el agente te escucha genuinamente, pide disculpas y te da un número de caso, bajas un poco la guardia pero sigues exigente. Preguntas clave que harás: ¿cuándo me devuelven el dinero? ¿quién me garantiza que no vuelve a pasar? ¿puedo hablar con un supervisor?
+Máximo 3 oraciones, español colombiano.`,
+    suggestions: ['Entiendo su molestia y tiene toda la razón', 'Verifico su convenio y registro el reclamo ahora mismo', 'Le genero el radicado y proceso la reversión', 'Escalo el caso para prevenir que se repita'],
+    checklist: ['Dejó hablar al cliente sin interrumpir','Mostró empatía genuina','NO se puso defensivo','Verificó el convenio del cliente','Registró el reclamo (PQR)','Dio número de radicado','Explicó proceso de devolución','Ofreció seguimiento proactivo']
+  },
+  {
+    id: 'invest1',
+    tag: 'invest', tagLabel: 'Inversión',
+    name: 'Asesoría para invertir ahorros en CDT',
+    difficulty: 2,
+    clientName: 'Ana Lucia Torres', clientInitial: 'AL',
+    clientInfo: 'Ahorradora · CC 43.210.987',
+    opening: 'Buenas. Tengo $20,000,000 guardados en mi cuenta de ahorros y me dijeron que en un CDT puedo ganar más. Pero no entiendo bien cómo funciona. ¿Es seguro? ¿Qué pasa si necesito el dinero antes? Tampoco quiero pagar muchos impuestos.',
+    systemPrompt: `Eres Ana Lucia Torres, 47 años, ama de casa con esposo pensionado. Tienes ahorros de $20M y quieres que rindan más pero eres muy precavida con el riesgo.
+Tu perfil: conservadora, no tienes conocimientos financieros avanzados, desconfías un poco de los bancos.
+Comportamiento: haz preguntas concretas como "¿y si el banco quiebra qué pasa?" o "¿me van a cobrar alguna multa si cancelo antes?". Si el agente usa jerga financiera sin explicar, pides que te lo diga "en palabras normales". Si el agente es claro, paciente y no te presiona, muestras interés. Si sientes presión de venta, dices "déjeme pensarlo con mi esposo".
+Habla con naturalidad colombiana, máximo 3 oraciones.`,
+    suggestions: ['Con mucho gusto le explico cómo funciona el CDT', 'Es un depósito a término fijo respaldado por Fogafín', 'A 180 días ganaría aproximadamente $1,120,000 de intereses', 'También le puedo mostrar otras opciones de menor plazo'],
+    checklist: ['Saludó y generó confianza','Explicó qué es un CDT en términos simples','Mencionó la garantía de Fogafín','Calculó rentabilidad aproximada','Explicó las penalidades por retiro anticipado','Mencionó retención en la fuente sobre rendimientos','No presionó al cliente','Ofreció tiempo para decidir']
+  },
+  {
+    id: 'transf1',
+    tag: 'account', tagLabel: 'Operaciones',
+    name: 'Transferencia internacional urgente',
+    difficulty: 3,
+    clientName: 'Jorge Herrera', clientInitial: 'JH',
+    clientInfo: 'Cuenta empresarial · NIT 900.123.456',
+    opening: 'Necesito hacer una transferencia a España de USD 25,000 hoy mismo. Es un pago a un proveedor y si no llega hoy, perdemos el contrato. ¿Se puede hacer? ¿Cuánto demora?',
+    systemPrompt: `Eres Jorge Herrera, 44 años, gerente de una empresa importadora. Necesitas hacer una transferencia internacional urgente.
+Tu estado: muy estresado por la urgencia del negocio. Conoces algo de temas bancarios empresariales.
+Tus datos: cuenta empresarial bajo NIT 900.123.456, ya tienes perfil cambiario activo, la empresa importa equipos de España.
+Comportamiento: si el agente te dice "no se puede hoy" sin buscar alternativas, te molestas. Preguntas clave: ¿cómo puedo hacer el formulario DCIN-83 más rápido? ¿hay algún horario límite para que salga hoy? ¿cuál es la comisión exacta? Si el agente muestra iniciativa y busca soluciones, aprecias mucho eso.
+Español directo, ejecutivo, máximo 3 oraciones.`,
+    suggestions: ['Verifico su perfil cambiario de inmediato', 'Para USD 25,000 se requiere el formulario DCIN-83', 'Si llega antes de las 2pm podría procesarse hoy', 'La comisión aproximada es $95,000 COP'],
+    checklist: ['Verificó perfil cambiario activo','Explicó regulación DCIN-83','Informó horario límite de radicación','Indicó comisiones exactas','Explicó tiempo de llegada SWIFT','Buscó alternativas para cumplir urgencia','Coordinó con área internacional','Documentó la solicitud']
+  }
+];
+
+// ── STATE ──
+let currentScenario = null;
+let conversationHistory = [];
+let isLoading = false;
+let currentTab = 'score';
+let checklistState = {};
+let sessionMetrics = { messages: 0, startTime: null, responseTimes: [], feedbackItems: [] };
+
+// ── INIT ──
+function init() {
+  renderScenarioList();
+  renderKBList();
+  renderRightPanel();
+  const name = prompt('Ingresa tu nombre para comenzar el entrenamiento:') || 'Agente BPO';
+  document.getElementById('traineeName').textContent = name;
+  document.getElementById('traineeInitials').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+}
+
+function renderScenarioList() {
+  const list = document.getElementById('scenarioList');
+  list.innerHTML = SCENARIOS.map(s => {
+    const dots = [1,2,3].map(i => `<div class="diff-dot ${i<=s.difficulty?'filled':'empty'}"></div>`).join('');
+    return `<div class="scenario-item" id="sc-${s.id}" onclick="loadScenario('${s.id}')">
+      <div class="scenario-tag ${s.tag}">${s.tagLabel}</div>
+      <div class="scenario-name">${s.name}</div>
+      <div class="scenario-diff">${dots}<span class="diff-label">Dificultad</span></div>
+    </div>`;
+  }).join('');
+}
+
+function renderKBList() {
+  const list = document.getElementById('kbList');
+  list.innerHTML = KB.map(k => `
+    <div class="kb-card" onclick="openKBArticle('${k.id}')">
+      <div class="kb-icon">📋</div>
+      <div class="kb-card-title">${k.title}</div>
+      <div class="kb-card-desc">${k.tags.join(' · ')}</div>
+    </div>`).join('');
+}
+
+function loadScenario(id) {
+  const s = SCENARIOS.find(x => x.id === id);
+  if (!s) return;
+  currentScenario = s;
+  conversationHistory = [];
+  sessionMetrics = { messages: 0, startTime: Date.now(), responseTimes: [], feedbackItems: [] };
+
+  document.querySelectorAll('.scenario-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sc-'+id).classList.add('active');
+
+  document.getElementById('clientAvatar').textContent = s.clientInitial;
+  document.getElementById('clientName').textContent = s.clientName;
+  document.getElementById('clientInfo').textContent = s.clientInfo;
+
+  checklistState = {};
+  s.checklist.forEach((_, i) => checklistState[i] = false);
+
+  const msgs = document.getElementById('messages');
+  msgs.innerHTML = '';
+
+  addSystemMsgToUI(`Escenario: "${s.name}" · Cliente: ${s.clientName}`);
+
+  conversationHistory.push({ role: 'user', content: s.opening });
+  addClientMsgToUI(s.opening);
+
+  renderSuggestions(s.suggestions);
+  renderRightPanel();
+}
+
+function renderSuggestions(sugs) {
+  const row = document.getElementById('suggestionsRow');
+  row.innerHTML = sugs.map(s =>
+    `<button class="sug-chip" onclick="useSuggestion(this)">${s}</button>`
+  ).join('');
+}
+
+function addClientMsgToUI(text) {
+  const s = currentScenario;
+  addMsgToUI('client', s ? s.clientInitial : 'C', text);
+}
+
+function addTraineeMsgToUI(text) {
+  const initials = document.getElementById('traineeInitials').textContent;
+  addMsgToUI('trainee', initials, text, true);
+}
+
+function addMsgToUI(type, av, text, isTrainee) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  const time = new Date().toLocaleTimeString('es-CO', {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `
+    <div class="msg-av ${isTrainee?'trainee-av':'client-av'}">${av}</div>
+    <div>
+      <div class="bubble">${escHtml(text)}</div>
+      <div class="msg-meta">${time}</div>
+    </div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addSystemMsgToUI(text) {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg system-msg';
+  div.innerHTML = `<div class="bubble">${escHtml(text)}</div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addTypingIndicator() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg client typing-indicator';
+  div.id = 'typing-indicator';
+  const s = currentScenario;
+  div.innerHTML = `
+    <div class="msg-av client-av">${s ? s.clientInitial : 'C'}</div>
+    <div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTypingIndicator() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function escHtml(t) {
+  return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendAgentMessage(); }
+}
+
+function useSuggestion(el) {
+  document.getElementById('agentInput').value = el.textContent;
+  sendAgentMessage();
+}
+
+async function sendAgentMessage() {
+  if (isLoading || !currentScenario) return;
+  const input = document.getElementById('agentInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  input.style.height = 'auto';
+
+  addTraineeMsgToUI(text);
+  conversationHistory.push({ role: 'assistant', content: text });
+  sessionMetrics.messages++;
+
+  isLoading = true;
+  const t0 = Date.now();
+  addTypingIndicator();
+
+  try {
+    const s = currentScenario;
+    const evalPrompt = `Además de responder como cliente, después de tu respuesta como cliente agrega en una línea separada que empiece con "EVAL:" una evaluación breve del mensaje del agente: menciona 1 cosa bien hecha y 1 área de mejora si aplica. Máximo 20 palabras en EVAL.`;
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: s.systemPrompt + '\n\n' + evalPrompt,
+        messages: conversationHistory.map(m => ({
+          role: m.role === 'assistant' ? 'user' : 'assistant',
+          content: m.content
+        }))
+      })
+    });
+
+    const data = await res.json();
+    const fullReply = data.content?.[0]?.text || 'Lo siento, hubo un error.';
+
+    const evalMatch = fullReply.match(/EVAL:\s*(.+)/i);
+    const clientReply = fullReply.replace(/\nEVAL:.+/i, '').trim();
+
+    removeTypingIndicator();
+    addClientMsgToUI(clientReply);
+    conversationHistory.push({ role: 'user', content: clientReply });
+
+    const elapsed = (Date.now() - t0) / 1000;
+    sessionMetrics.responseTimes.push(elapsed);
+
+    if (evalMatch) {
+      const evalText = evalMatch[1].trim();
+      sessionMetrics.feedbackItems.push({ text: evalText, msg: sessionMetrics.messages });
+      autoCheckChecklist(text);
+    }
+
+    updateMetricsUI();
+
+  } catch (err) {
+    removeTypingIndicator();
+    addSystemMsgToUI('Error de conexión: ' + err.message);
+  }
+
+  isLoading = false;
+}
+
+function autoCheckChecklist(agentMsg) {
+  if (!currentScenario) return;
+  const msg = agentMsg.toLowerCase();
+  const s = currentScenario;
+  s.checklist.forEach((item, i) => {
+    if (checklistState[i]) return;
+    const itemLower = item.toLowerCase();
+    if (itemLower.includes('salud') && (msg.includes('buenos') || msg.includes('buen') || msg.includes('hola') || msg.includes('tarde'))) checklistState[i] = true;
+    if (itemLower.includes('identidad') && (msg.includes('cédula') || msg.includes('nombre') || msg.includes('verific') || msg.includes('confirmo'))) checklistState[i] = true;
+    if (itemLower.includes('radicado') || itemLower.includes('caso') && (msg.includes('radicado') || msg.includes('número de caso') || msg.includes('registro'))) checklistState[i] = true;
+    if (itemLower.includes('bloqueo') && (msg.includes('bloqueo') || msg.includes('bloqueamos') || msg.includes('bloquear'))) checklistState[i] = true;
+    if (itemLower.includes('empat') && (msg.includes('entiendo') || msg.includes('comprendo') || msg.includes('lamento'))) checklistState[i] = true;
+    if (itemLower.includes('reclamo') && (msg.includes('reclamo') || msg.includes('registra') || msg.includes('pqr'))) checklistState[i] = true;
+    if (itemLower.includes('escal') && (msg.includes('escalo') || msg.includes('supervisor') || msg.includes('fraudes') || msg.includes('transfiero'))) checklistState[i] = true;
+    if (itemLower.includes('tasa') && (msg.includes('tasa') || msg.includes('%') || msg.includes('mensual'))) checklistState[i] = true;
+    if (itemLower.includes('cdt') && (msg.includes('cdt') || msg.includes('depósito a término') || msg.includes('fogafin'))) checklistState[i] = true;
+    if (itemLower.includes('dcin') && (msg.includes('dcin') || msg.includes('formulario'))) checklistState[i] = true;
+  });
+  if (currentTab === 'checklist') renderRightPanel();
+}
+
+function updateMetricsUI() {
+  if (currentTab === 'score') renderRightPanel();
+  if (currentTab === 'feedback') renderRightPanel();
+}
+
+// ── RIGHT PANEL RENDER ──
+function switchTab(el, tab) {
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  currentTab = tab;
+  renderRightPanel();
+}
+
+function renderRightPanel() {
+  const content = document.getElementById('rightContent');
+  if (currentTab === 'score') content.innerHTML = renderScoreTab();
+  else if (currentTab === 'feedback') content.innerHTML = renderFeedbackTab();
+  else if (currentTab === 'checklist') content.innerHTML = renderChecklistTab();
+}
+
+function renderScoreTab() {
+  const m = sessionMetrics;
+  const checked = Object.values(checklistState).filter(Boolean).length;
+  const total = Object.values(checklistState).length || 1;
+  const protocol = Math.round((checked / total) * 100);
+  const avgResp = m.responseTimes.length ? (m.responseTimes.reduce((a,b)=>a+b,0)/m.responseTimes.length).toFixed(1) : '—';
+  const score = protocol;
+
+  return `
+    <div class="score-grid">
+      <div class="score-card"><div class="score-val">${score}</div><div class="score-lbl">Puntaje</div></div>
+      <div class="score-card"><div class="score-val">${m.messages}</div><div class="score-lbl">Mensajes</div></div>
+      <div class="score-card"><div class="score-val">${avgResp}s</div><div class="score-lbl">Resp. prom.</div></div>
+      <div class="score-card"><div class="score-val">${checked}/${total}</div><div class="score-lbl">Protocolo</div></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>Protocolo</span><span>${protocol}%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-green" style="width:${protocol}%"></div></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>Empatía estimada</span><span>${m.messages > 0 ? Math.min(100,60+m.messages*8) : 0}%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-gold" style="width:${m.messages > 0 ? Math.min(100,60+m.messages*8) : 0}%"></div></div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-label"><span>Conocimiento técnico</span><span>${m.feedbackItems.length > 0 ? Math.min(100,50+m.feedbackItems.length*15) : 0}%</span></div>
+      <div class="progress-bar"><div class="progress-fill fill-blue" style="width:${m.feedbackItems.length > 0 ? Math.min(100,50+m.feedbackItems.length*15) : 0}%"></div></div>
+    </div>
+    ${!currentScenario ? '<p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;">Selecciona un escenario para ver métricas</p>' : ''}
+  `;
+}
+
+function renderFeedbackTab() {
+  const items = sessionMetrics.feedbackItems;
+  if (!currentScenario) return '<p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;">Inicia una sesión para ver retroalimentación en tiempo real.</p>';
+  if (items.length === 0) return '<p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;">Envía tu primer mensaje para recibir retroalimentación.</p>';
+
+  return items.map((item, i) => {
+    const type = i % 3 === 0 ? 'good' : i % 3 === 1 ? 'warn' : 'good';
+    const icon = type === 'good' ? '✓' : '→';
+    return `<div class="feedback-item ${type}">
+      <div class="feedback-title">${icon} Mensaje #${item.msg}</div>
+      ${item.text}
+    </div>`;
+  }).join('');
+}
+
+function renderChecklistTab() {
+  if (!currentScenario) return '<p style="font-size:12px;color:var(--text3);text-align:center;margin-top:20px;">Selecciona un escenario para ver el protocolo.</p>';
+  return currentScenario.checklist.map((item, i) => {
+    const done = checklistState[i];
+    return `<div class="checklist-item" onclick="toggleCheck(${i})">
+      <div class="check-box ${done?'checked'}">${done?'<svg width="10" height="10" viewBox="0 0 12 12" fill="none"><polyline points="2,6 5,9 10,3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':''}</div>
+      <div class="check-text ${done?'done'}">${item}</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleCheck(i) {
+  checklistState[i] = !checklistState[i];
+  renderRightPanel();
+  if (currentTab === 'score') renderRightPanel();
+}
+
+// ── SESSION END ──
+function endSession() {
+  if (!currentScenario) return;
+  const checked = Object.values(checklistState).filter(Boolean).length;
+  const total = Object.values(checklistState).length || 1;
+  const protocol = Math.round((checked / total) * 100);
+  const avgResp = sessionMetrics.responseTimes.length ? (sessionMetrics.responseTimes.reduce((a,b)=>a+b,0)/sessionMetrics.responseTimes.length).toFixed(1) : 'N/A';
+
+  let grade = '';
+  if (protocol >= 90) grade = 'Excelente — Listo para operar';
+  else if (protocol >= 75) grade = 'Bueno — Pequeños ajustes necesarios';
+  else if (protocol >= 60) grade = 'Regular — Requiere más práctica';
+  else grade = 'Insuficiente — Revisar protocolo';
+
+  document.getElementById('resultScore').textContent = protocol;
+  document.getElementById('resultGradeLabel').textContent = grade;
+  document.getElementById('resultBreakdown').innerHTML = `
+    <div><div class="rb-val">${sessionMetrics.messages}</div><div class="rb-lbl">Mensajes</div></div>
+    <div><div class="rb-val">${checked}/${total}</div><div class="rb-lbl">Protocolo</div></div>
+    <div><div class="rb-val">${avgResp}s</div><div class="rb-lbl">Resp. prom.</div></div>
+  `;
+  document.getElementById('resultSummary').textContent = sessionMetrics.feedbackItems.length > 0
+    ? `Retroalimentación acumulada: ${sessionMetrics.feedbackItems.map(f=>f.text).join(' | ')}`
+    : 'No hay retroalimentación registrada en esta sesión.';
+
+  document.getElementById('resultOverlay').classList.add('show');
+}
+
+function closeResult() {
+  document.getElementById('resultOverlay').classList.remove('show');
+}
+
+function retryScenario() {
+  closeResult();
+  if (currentScenario) loadScenario(currentScenario.id);
+}
+
+function showKB() {
+  switchTab(document.querySelectorAll('.rtab')[2], 'checklist');
+}
+
+function openKBArticle(id) {
+  const article = KB.find(k => k.id === id);
+  if (!article) return;
+  const content = document.getElementById('rightContent');
+  document.querySelectorAll('.rtab').forEach(t => t.classList.remove('active'));
+  content.innerHTML = `
+    <div style="margin-bottom:16px;">
+      <button onclick="switchTab(document.querySelectorAll('.rtab')[0],'score')" style="font-size:11px;padding:4px 10px;border:1px solid var(--border);border-radius:5px;background:transparent;cursor:pointer;color:var(--text2);">← Volver</button>
+    </div>
+    <div class="kb-article">
+      <div class="kb-article-title">${article.title}</div>
+      <div style="margin-bottom:10px;">${article.tags.map(t=>`<span class="kb-tag">${t}</span>`).join('')}</div>
+      <div class="kb-article-body">${article.body.replace(/\n/g,'<br>')}</div>
+    </div>
+  `;
+}
+
+init();
+</script>
+</body>
+</html>
