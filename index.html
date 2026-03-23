@@ -778,9 +778,36 @@ function init() {
   renderScenarioList();
   renderKBList();
   renderRightPanel();
-  const name = prompt('Ingresa tu nombre para comenzar el entrenamiento:') || 'Agente BPO';
+  showNameModal();
+}
+
+function showNameModal() {
+  const overlay = document.createElement('div');
+  overlay.id = 'name-modal';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(10,22,40,0.7);z-index:300;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;padding:36px;width:360px;max-width:90vw;text-align:center;box-shadow:0 8px 40px rgba(10,22,40,0.2);">
+      <div style="font-family:'DM Serif Display',serif;font-size:22px;color:#0a1628;margin-bottom:6px;">Bienvenido</div>
+      <div style="font-size:13px;color:#8896aa;margin-bottom:24px;">Simulador BPO · Banca</div>
+      <input id="name-input" type="text" placeholder="Tu nombre completo" maxlength="40"
+        style="width:100%;padding:10px 14px;font-size:14px;font-family:'DM Sans',sans-serif;border:1px solid rgba(10,22,40,0.15);border-radius:8px;outline:none;margin-bottom:16px;background:#faf8f4;color:#1a1a2e;"
+        onkeydown="if(event.key==='Enter') confirmName()">
+      <button onclick="confirmName()"
+        style="width:100%;padding:11px;background:#0a1628;color:#fff;border:none;border-radius:8px;font-size:14px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500;">
+        Comenzar entrenamiento
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+  setTimeout(() => document.getElementById('name-input').focus(), 100);
+}
+
+function confirmName() {
+  const input = document.getElementById('name-input');
+  const name = (input ? input.value.trim() : '') || 'Agente BPO';
   document.getElementById('traineeName').textContent = name;
   document.getElementById('traineeInitials').textContent = name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const modal = document.getElementById('name-modal');
+  if (modal) modal.remove();
 }
 
 function renderScenarioList() {
@@ -933,7 +960,7 @@ async function sendAgentMessage() {
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': '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', 'anthropic-version': '2023-06-01' },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
